@@ -14,7 +14,7 @@ import os, json, struct
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHARMAP = os.path.join(ROOT, 'translation', 'charmap.json')
 
-TABLE_MAX = (4096 - 8) // 2       # FontTbl?BinBuff is 4 KB (slti v0,4097 at 0x2efdd8)
+TABLE_MAX = (8192 - 8) // 2       # FontTbl?BinBuff 두 개(각 4KB)를 한 표로 합쳐 씀 (fontfix)
 
 
 def hangul2350():
@@ -53,12 +53,19 @@ def charmap():
             os.makedirs(os.path.dirname(CHARMAP), exist_ok=True)
             json.dump({h: '%04X' % c for h, c in _cm.items()}, open(CHARMAP, 'w', encoding='utf-8'),
                       ensure_ascii=False, indent=0)
+        if JAMO[0] not in _cm:
+            for ch, c in zip(JAMO, sjis_slots(2350 + len(JAMO))[2350:]):
+                _cm[ch] = c
         _rev = {v: k for k, v in _cm.items()}
     return _cm
 
 
+# 이름 입력 자모 조합(hanime)용 자모 40자: 초성 19 + 중성 21 (유니코드 초성·중성 순서), 2,350 음절 다음 칸
+JAMO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ'
+
+
 def is_hangul(ch):
-    return '가' <= ch <= '힣'
+    return '가' <= ch <= '힣' or ch in JAMO
 
 
 def char_code(ch):

@@ -17,13 +17,16 @@ CW, CH, COLS, ROWS = 18, 22, 28, 17
 PER_PAGE = COLS * ROWS
 L3_PAGES = [('FontTex_l3_01.tm2', 2), ('FontTex_l3_01.tm2', 0), ('FontTex_l3_23.tm2', 2),
             ('FontTex_l3_23.tm2', 0), ('FontTex_l3_45.tm2', 2), ('FontTex_l3_45.tm2', 0)]
-S3_PAGES = [('FontTex_s3_0.tm2', 0), ('FontTex_s3_1.tm2', 0), ('FontTex_s3_2.tm2', 0)]
-CAPACITY = {'l3': len(L3_PAGES) * PER_PAGE, 's3': len(S3_PAGES) * PER_PAGE}
+S3_PAGES = [('FontTex_s3_0.tm2', 0), ('FontTex_s3_1.tm2', 0), ('FontTex_s3_2.tm2', 0)]       # 원본 4bpp
+# 한글 확장판: s3 도 l3 처럼 2bpp 페이지 6장 (fontfix 가 게임 쪽을 고침)
+S3P_PAGES = [('FontTex_s3_0.tm2', 2), ('FontTex_s3_0.tm2', 0), ('FontTex_s3_1.tm2', 2),
+             ('FontTex_s3_1.tm2', 0), ('FontTex_s3_2.tm2', 2), ('FontTex_s3_2.tm2', 0)]
+CAPACITY = {'l3': len(L3_PAGES) * PER_PAGE, 's3': len(S3P_PAGES) * PER_PAGE}
 
 # per font: (ttf, box x, box y, box w, box h, levels, bits)
 STYLE = {
     'l3': ('NanumSquareNeo-cBd.ttf', 0, 1, 17, 21, 3, 2),
-    's3': ('NanumSquareNeo-cBd.ttf', 0, 1, 15, 19, 15, 4),
+    's3': ('NanumSquareNeo-cBd.ttf', 0, 1, 15, 19, 3, 2),
 }
 
 
@@ -48,25 +51,34 @@ class Tim4:
 
 
 class FontPak:
-    def __init__(self, data):
+    def __init__(self, data, s3_planar=False):
+        """s3_planar: s3 를 2bpp 6페이지로 읽고 쓴다 (원본 파일을 읽을 땐 False)"""
+        self.s3_planar = s3_planar
         self.pak = Pak(data)
         self.tex = {n: Tim4(self.pak.get(n)) for n in self.pak.names() if n.endswith('.tm2')
                     and len(self.pak.get(n))}
 
     def _loc(self, font, i):
-        pages = L3_PAGES if font == 'l3' else S3_PAGES
+        pages = L3_PAGES if font == 'l3' else S3P_PAGES if self.s3_planar else S3_PAGES
         name, sh = pages[i // PER_PAGE]
         k = i % PER_PAGE
         return self.tex[name].a, (k // COLS) * CH, (k % COLS) * CW, sh
 
+    def mask(self, font):
+        return 3 if font == 'l3' or self.s3_planar else 15
+
+    def clear(self, font):
+        for n, _ in (L3_PAGES if font == 'l3' else S3P_PAGES):
+            self.tex[n].a[:] = 0
+
     def get(self, font, i):
         a, y, x, sh = self._loc(font, i)
-        mask = 3 if font == 'l3' else 15
+        mask = self.mask(font)
         return (a[y:y + CH, x:x + CW] >> sh) & mask
 
     def put(self, font, i, g):
         a, y, x, sh = self._loc(font, i)
-        mask = 3 if font == 'l3' else 15
+        mask = self.mask(font)
         cell = a[y:y + CH, x:x + CW]
         cell &= ~np.uint8(mask << sh) & 15
         cell |= (np.asarray(g, np.uint8) & mask) << sh

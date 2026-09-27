@@ -3,7 +3,7 @@
 python tools/build.py [출력 ISO]
 """
 import os, sys, re, collections
-import instr, itemana, mapname, dq8arc, isopatch, btltext, namepad, stbtext, menutext, title_logo
+import instr, itemana, mapname, hanime, fontfix, m3font, dq8arc, isopatch, btltext, namepad, stbtext, menutext, title_logo, flyhelp
 VOICE_MODE = os.environ.get('DQ8_VOICE', '')      # '' | 'test' | 'full'
 from font16 import patch_font16
 from elfstr import read_iso_file
@@ -86,23 +86,27 @@ def main(out_iso=OUT_ISO):
     hs = hangul_of(s3_texts)
     for ch in list(hl) + list(hs):
         charmap()[ch]                           # KS X 1001 밖 글자 검사
-    Lk, dl = korean_table(Lj, hl, CAPACITY['l3'])
-    # s3: 메뉴 글자 우선, 남는 자리에 대사 글자(빈도순)
-    room = min(2044, CAPACITY['s3']) - Sj.n_nonkanji
-    extra = [ch for ch, _ in (hl - hs).most_common() if ch not in hs]
-    Sk, ds = korean_table(Sj, list(hs) + extra[:max(0, room - len(hs))], CAPACITY['s3'])
-    print('l3 표 %d자 (한글 %d)  s3 표 %d자 (한글 %d)' % (len(Lk.codes), len(Lk.codes) - Lk.n_nonkanji,
-                                                    len(Sk.codes), len(Sk.codes) - Sk.n_nonkanji))
+    # 한글 2,350자 + 자모 전부를 두 글꼴에 (fontfix: s3 2bpp 6페이지, l3·s3 가 8KB 글자표 하나를 함께 씀)
+    Lk, dl = korean_table(Lj, list(charmap()), CAPACITY['l3'])
+    Sk, ds = Lk, dl
+    print('글자표 %d자 (한글·자모 %d, 빠진 가나 %d)' % (len(Lk.codes), len(Lk.codes) - Lk.n_nonkanji, len(dl)))
 
     files = {}
     files['meswin' + BS + 'fonttbl_l3.bin'] = Lk.build()
-    files['meswin' + BS + 'fonttbl_s3.bin'] = Sk.build()
+    files['meswin' + BS + 'fonttbl_s3.bin'] = Sk.build()        # l3 와 같은 표 (게임은 한 버퍼를 같이 씀)
 
     # ---- 폰트 텍스처
     raw = a.read('meswin' + BS + 'font_tex_l3s3.pak')
-    src, dst = FontPak(raw), FontPak(raw)
+    src, dst = FontPak(raw), FontPak(raw, s3_planar=True)
+    dst.clear('s3')
     for font, J, K in (('l3', Lj, Lk), ('s3', Sj, Sk)):
         for i, c in enumerate(K.codes):
+            if font == 's3' and c != SPACE and c < 0x889f and c not in J.index:
+                dst.put(font, i, src.get('l3', Lj.index[c]))   # 원본 s3 에 없는 기호: l3 글리프
+                continue
+            if font == 's3' and c != SPACE and c < 0x889f:
+                dst.put(font, i, src.get(font, J.index[c]) >> 2)  # 16단계 -> 4단계
+                continue
             if c == SPACE:
                 # 0x20은 게임이 건너뜀 -> 번역문 공백은 빈 "_" 글리프(반각)로
                 g = src.get(font, J.index[c]) * 0
@@ -216,17 +220,33 @@ def main(out_iso=OUT_ISO):
     files.update(stbtext.build(to_sjis))
     files.update(menutext.build(to_sjis))
     files.update(title_logo.build())                # 타이틀 로고 부제
+    files.update(flyhelp.build())                  # 신조 비행 조작 설명 그림
     files.update(mapname.build(a, to_sjis))
+    m3files, _ = m3font.build(a)                    # 지명 글꼴 한글판
+    files.update(m3files)
     files[itemana.NAME] = itemana.build(a.read(a.hd6.get(itemana.NAME)), to_sjis)
     for n, tr in inpl.items():                      # 전투 기록 화면·연금 레시피 힌트
-        if not tr:
+        if not tr and not any(c[0] == n for c in instr.CODES):
             continue
-        files[n] = instr.apply(a.read(a.hd6.get(n)), tr, to_sjis)
+        files[n] = instr.apply(a.read(a.hd6.get(n)), tr, to_sjis, n)
         if n in instr.PAK_MEMBERS:                  # bin_ext.pak 안 사본 (문자열 순서가 같음)
             pn, mem = instr.PAK_MEMBERS[n]
             pk = Pak(files[pn.replace('/', BS)]) if pn.replace('/', BS) in files else Pak(a.read(a.hd6.get(pn)))
             pk.put(mem, instr.apply_by_order(pk.get(mem), a.read(a.hd6.get(n)), tr, to_sjis))
             files[pn.replace('/', BS)] = pk.build()
+
+    # ---- 전투 기록 화면 트로데 코멘트: senreki2.chr 안에 박힌 mes (l3 코드, 크기 고정)
+    sk = 'menu' + BS + 'senreki2.chr'
+    d = bytearray(files[sk] if sk in files else a.read(a.hd6.get(sk)))
+    o0, o1 = instr.TRODE_MES
+    ms = Mes(bytes(d[o0:o1]))
+    tr = ko_rows('mes', 'menu/senreki2.chr__trode')
+    for mid, w in ms.messages():
+        ms.set(mid, enc_ko(tr[str(mid)], Lk) if str(mid) in tr else reenc_jp(w, Lj, Lk))
+    nb = ms.build()
+    assert len(nb) <= o1 - o0, ('트로데 코멘트 초과', len(nb) - (o1 - o0))
+    d[o0:o1] = nb + b'\0' * (o1 - o0 - len(nb))
+    files[sk] = bytes(d)
 
     # ---- 메뉴 창 폰트 font16 (JIS 배열): 한자 자리에 한글 2,350자
     for n in ('font16.img', '_font16.img', 'img' + BS + 'font16.img', 'img' + BS + 'font16.dat'):
@@ -251,6 +271,11 @@ def main(out_iso=OUT_ISO):
             data[off:end] = b + b'\0' * (end - off - len(b))
         if f == 'SLPM_658.88':
             namepad.patch(data, plain_sjis)
+            fontfix.patch(data)                     # 글꼴 확장 (s3 6페이지, 8KB 공용 글자표)
+            # 이름 입력 자모 조합: 대사(l3)·메뉴(s3) 두 글꼴에 모두 있는 음절만 조합 허용
+            allowed = [ch for ch, c in charmap().items() if '가' <= ch <= '힣' and c in Lk.index and c in Sk.index]
+            n_ok, n_dir = hanime.patch(data, allowed, charmap())
+            print('이름 조합 허용 음절 %d자 (표 조각 %d)' % (n_ok, n_dir))
             if VOICE_MODE:                      # 개인용 음성판 전용 (공개 저장소에는 없는 모듈)
                 import voicehook
                 voicehook.patch(data)

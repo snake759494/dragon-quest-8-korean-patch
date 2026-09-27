@@ -7,7 +7,7 @@ import dq8arc, btltext
 from extract import read_tsv
 
 ROOT = dq8arc.ROOT
-FILES = ['map/map10.cfg', 'map/map.cfg']
+FILES = ['map/map10.cfg', 'map/map.cfg', 'map/map7.cfg', 'map/map8.cfg', 'map/map9.cfg']
 TSV = os.path.join(ROOT, 'translation', 'ko', 'map', 'mapnames.tsv')
 
 
