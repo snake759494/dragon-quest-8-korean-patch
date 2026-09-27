@@ -3,7 +3,7 @@
 python tools/build.py [출력 ISO]
 """
 import os, sys, re, collections
-import dq8arc, isopatch, btltext, namepad, stbtext, menutext
+import dq8arc, isopatch, btltext, namepad, stbtext, menutext, title_logo
 from font16 import patch_font16
 from elfstr import read_iso_file
 from formats import Pak, Mes, str_parse, str_build, evtxt_parse, evtxt_build
@@ -202,6 +202,7 @@ def main(out_iso=OUT_ISO):
     files.update(btltext.build(to_sjis))
     files.update(stbtext.build(to_sjis))
     files.update(menutext.build(to_sjis))
+    files.update(title_logo.build())                # 타이틀 로고 부제
 
     # ---- 메뉴 창 폰트 font16 (JIS 배열): 한자 자리에 한글 2,350자
     for n in ('font16.img', '_font16.img', 'img' + BS + 'font16.img', 'img' + BS + 'font16.dat'):

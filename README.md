@@ -5,25 +5,26 @@ PS2 일본판 **ドラゴンクエストVIII 空と海と大地と呪われし�
 ## 적용 방법
 1. 원본 `Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso` 준비
    - 크기 4,062,642,176 B, SHA-1 `85a1b76a9f7a21d10da967cbf2688f1b79071f5c`
-2. 릴리즈에서 `DQ8_KO_v1.0.xdelta` 받기
+2. 릴리즈에서 `DQ8_KO_v1.1.xdelta` 받기
 3. xdeltaUI 또는 명령:
    ```
-   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.0.xdelta DQ8_KR.iso
+   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.1.xdelta DQ8_KR.iso
    ```
-4. 결과 SHA-1 `64bc0fa28aab3021982b7b5e3acb4ce2455c5e2b` → PCSX2 등에서 실행
+4. 결과 SHA-1 `b269e65818a56b4a1723992511299e742adf0bbf` → PCSX2 등에서 실행
 
 ## 한글화 범위
 - 대사 전체: 이벤트 대사, 마을 주민 대사, 동료 대화, 필드 대화, 줄거리 요약, 보물상자·조사 메시지, 책장 책
 - 메뉴·시스템: 타이틀·모험의 서, 필드·전투 메뉴, 강함·주문·특기 설명, 상점·여관·교회·은행, 메모리카드·세이브 화면, 연금, 몬스터 리스트·팀
 - 전투: 전투 메시지, 몬스터 이름, 아이템 이름·설명
 - 글꼴: 대화창 글꼴 2종과 메뉴 창 글꼴에 한글 (NanumSquare Neo Bold, 원본 획 두께와 비교해 선택)
+- 타이틀 로고: 일본어 부제 두 줄을 한글로 교체(로고 그림은 원본 유지)
 - 이름 입력: 가나 문자판을 한글 음절판 두 판(ㄱ~ㅅ / ㅇ~ㅎ, 각 85자)으로 교체
 
 ## 알려진 한계
 - 이름 입력은 문자판에 있는 170음절로만 할 수 있습니다.
 - 메뉴 글꼴 칸이 가득 차서, 메뉴 글꼴로 그려지는 일부 대사에서 드문 글자가 ?로 보일 수 있습니다.
 - 컷신의 짧은 감탄사 일부는 연출용 라벨과 구분하지 못해 일본어로 남겨 두었습니다.
-- 이미지 속 글자(타이틀 로고 등)와 동영상은 손대지 않았습니다.
+- 타이틀 로고의 영문 "DRAGON QUEST" 그림과 동영상은 원본 그대로입니다.
 - PCSX2 v2.2.0에서 초반부(트라페타까지)를 확인했습니다. 전 구간 검수는 아직입니다. 글자 겹침·잘림·일본어 잔존을 발견하면 이슈로 알려 주세요.
 
 ## 저장소 구성
