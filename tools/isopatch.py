@@ -50,11 +50,16 @@ def patch_iso_files(out_iso, isofiles):
         locs[path] = (r.extent_location(), r.get_data_length())
     iso.close()
     with open(out_iso, 'r+b') as f:
+        recs = _root_records(f)
         for path, data in isofiles.items():
             lba, size = locs[path]
-            assert len(data) == size, path
+            cap = (size + SECTOR - 1) // SECTOR * SECTOR
+            assert size <= len(data) <= cap, (path, len(data), cap)      # 마지막 섹터 여유까지만
             f.seek(lba * SECTOR)
             f.write(data)
+            name = path.split('/')[-1]
+            if name in recs:                                          # 루트의 파일은 크기 값 갱신
+                _set_record(f, recs[name], lba, len(data))
 
 
 def patch(out_iso, files, log=print, isofiles=None):

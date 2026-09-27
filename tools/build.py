@@ -3,7 +3,8 @@
 python tools/build.py [출력 ISO]
 """
 import os, sys, re, collections
-import dq8arc, isopatch, btltext, namepad, stbtext, menutext, title_logo
+import instr, itemana, mapname, dq8arc, isopatch, btltext, namepad, stbtext, menutext, title_logo
+VOICE_MODE = os.environ.get('DQ8_VOICE', '')      # '' | 'test' | 'full'
 from font16 import patch_font16
 from elfstr import read_iso_file
 from formats import Pak, Mes, str_parse, str_build, evtxt_parse, evtxt_build
@@ -17,7 +18,7 @@ ROOT = dq8arc.ROOT
 TR = os.path.join(ROOT, 'translation')
 BS = '\\'
 OUT_ISO = os.path.join(ROOT, 'DQ8_KR.iso')
-ELF_FILES = ['SLPM_658.88', 'BIN/MENU.BIN']
+ELF_FILES = ['SLPM_658.88', 'BIN/MENU.BIN', 'BIN/CASINO.BIN']
 FALLBACK = 0x81A1
 # 표에 없는 문자 -> 비슷한 표 안 문자
 SUBST = {"'": '’', '"': '”', '·': '・', '‘': '’', '“': '”', '—': '―', '–': '-', '♥': '♪', '｢': '「', '｣': '」'}
@@ -66,8 +67,13 @@ def main(out_iso=OUT_ISO):
     elf_tr = {f: dict(read_tsv(os.path.join(TR, 'ko', 'elf', f.replace('/', '_') + '.tsv'))) for f in ELF_FILES}
     both = [t for nm in btltext.RECORDS for t in btl[nm].values()] + [''.join(namepad.ALL)]
     l3_texts += [t for nm in btltext.QUOTED for t in btl[nm].values()] + both
-    l3_texts += [t for d in elf_tr.values() for t in d.values()]
-    s3_texts += both
+    inpl = instr.load()                             # 전투 기록 화면·연금 레시피 힌트 (제자리 교체)
+    both += [t for d in elf_tr.values() for t in d.values()]   # 실행 파일 문자열: 메뉴(s3)·대사(l3) 양쪽에 쓰임
+    both += [t for d in inpl.values() for t in d.values()]
+    both += itemana.texts()                         # 아이템 분석(분류·능력치·설명)
+    both += mapname.texts()                         # 맵(지역) 이름
+    l3_texts += both
+    s3_texts += both + list(btl['itemstr1.lst'].values())       # 아이템 이름·설명은 메뉴 글자로 우선
     mt_menu, mt_dia = menutext.texts()
     s3_texts += mt_menu
     l3_texts += mt_menu + mt_dia
@@ -193,9 +199,16 @@ def main(out_iso=OUT_ISO):
         files[n] = p.build()
 
     # ---- 이벤트 txt
+    voice_marks, voice_files = {}, []
+    if VOICE_MODE:
+        import voice
+        voice_marks, voice_files = voice.plan(VOICE_MODE)
     for n, tr in ev.items():
         blocks = [(h, to_sjis(tr[h]).replace(b'\n', b'\r\n') if h in tr else sanitize(body, Lk))
                   for h, body in evtxt_parse(a.read(n))]
+        if VOICE_MODE:
+            stem = os.path.basename(n)[:-4]
+            blocks = [(h, voice_marks[(stem, h)] + b if (stem, h) in voice_marks else b) for h, b in blocks]
         files[n] = evtxt_build(blocks)
 
     # ---- 전투 텍스트·몬스터 이름 (bin\bin_ext.pak + 개별 bin_ext 파일)
@@ -203,6 +216,17 @@ def main(out_iso=OUT_ISO):
     files.update(stbtext.build(to_sjis))
     files.update(menutext.build(to_sjis))
     files.update(title_logo.build())                # 타이틀 로고 부제
+    files.update(mapname.build(a, to_sjis))
+    files[itemana.NAME] = itemana.build(a.read(a.hd6.get(itemana.NAME)), to_sjis)
+    for n, tr in inpl.items():                      # 전투 기록 화면·연금 레시피 힌트
+        if not tr:
+            continue
+        files[n] = instr.apply(a.read(a.hd6.get(n)), tr, to_sjis)
+        if n in instr.PAK_MEMBERS:                  # bin_ext.pak 안 사본 (문자열 순서가 같음)
+            pn, mem = instr.PAK_MEMBERS[n]
+            pk = Pak(files[pn.replace('/', BS)]) if pn.replace('/', BS) in files else Pak(a.read(a.hd6.get(pn)))
+            pk.put(mem, instr.apply_by_order(pk.get(mem), a.read(a.hd6.get(n)), tr, to_sjis))
+            files[pn.replace('/', BS)] = pk.build()
 
     # ---- 메뉴 창 폰트 font16 (JIS 배열): 한자 자리에 한글 2,350자
     for n in ('font16.img', '_font16.img', 'img' + BS + 'font16.img', 'img' + BS + 'font16.dat'):
@@ -227,11 +251,18 @@ def main(out_iso=OUT_ISO):
             data[off:end] = b + b'\0' * (end - off - len(b))
         if f == 'SLPM_658.88':
             namepad.patch(data, plain_sjis)
+            if VOICE_MODE:                      # 개인용 음성판 전용 (공개 저장소에는 없는 모듈)
+                import voicehook
+                voicehook.patch(data)
         isofiles[f] = bytes(data)
 
     if MISSING:
         print('표에 없어 ■로 바꾼 글자:', MISSING)
     isopatch.patch(out_iso, files, isofiles=isofiles)
+    if VOICE_MODE:
+        import isovoice
+        lba, end = isovoice.add_voice(out_iso, voice_files)
+        print('VOICE %d files, ISO %d sectors (%.2f GB)' % (len(voice_files), end, end * 2048 / 1e9))
 
 
 if __name__ == '__main__':

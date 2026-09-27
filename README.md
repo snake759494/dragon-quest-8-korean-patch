@@ -5,10 +5,10 @@ PS2 일본판 **ドラゴンクエストVIII 空と海と大地と呪われし�
 ## 적용 방법
 1. 원본 `Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso` 준비
    - 크기 4,062,642,176 B, SHA-1 `85a1b76a9f7a21d10da967cbf2688f1b79071f5c`
-2. 릴리즈에서 `DQ8_KO_v1.1.xdelta` 받기
+2. 릴리즈에서 `DQ8_KO_v1.2.xdelta` 받기
 3. xdeltaUI 또는 명령:
    ```
-   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.1.xdelta DQ8_KR.iso
+   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.2.xdelta DQ8_KR.iso
    ```
 4. 결과 SHA-1 `b269e65818a56b4a1723992511299e742adf0bbf` → PCSX2 등에서 실행
 
