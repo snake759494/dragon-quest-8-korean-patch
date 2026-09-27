@@ -1,0 +1,9 @@
+*.iso
+*.xdelta
+*.ttf
+__pycache__/
+build/
+extract/
+work/
+translation/jp/
+translation/ko/
