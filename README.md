@@ -6,11 +6,11 @@ PS2 일본판 **ドラゴンクエストVIII 空と海と大地と呪われし�
 1. 원본 `Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso` 준비
    - 크기 4,062,642,176 B, SHA-1 `85a1b76a9f7a21d10da967cbf2688f1b79071f5c`
 2. 릴리즈에서 xdelta 하나를 받기
-   - `DQ8_KO_v1.5.xdelta` — 기본판 (약 52MB)
-   - `DQ8_KO_v1.5_voice.xdelta` — 3DS판 일본어 음성을 더한 음성판 (약 1.8GB, 결과 ISO 6.2GB)
+   - `DQ8_KO_v1.6.xdelta` — 기본판 (약 52MB)
+   - `DQ8_KO_v1.6_voice.xdelta` — 3DS판 일본어 음성을 더한 음성판 (약 1.8GB, 결과 ISO 6.2GB)
 3. xdeltaUI 또는 명령:
    ```
-   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.5.xdelta DQ8_KR.iso
+   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.6.xdelta DQ8_KR.iso
    ```
 4. 결과 해시는 `validation/release_hashes.md` 참고 → PCSX2 등에서 실행
 

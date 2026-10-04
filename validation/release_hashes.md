@@ -1,3 +1,15 @@
+# v1.6 해시
+
+| 파일 | 크기 (B) | MD5 | SHA-1 | SHA-256 |
+|---|---|---|---|---|
+| 원본 ISO | 4,062,642,176 | `b694b94f017693083992063670d9f0c8` | `85a1b76a9f7a21d10da967cbf2688f1b79071f5c` | `de9e15ed16ec672b70bc045056f858961a6512d002daeb8ae5ecda5f2eb099ba` |
+| 결과 ISO (기본판) | 4,062,642,176 | `8b8ef503bf3f3ef323edd4712c8fb978` | `1192da922f725a313f66d3d479312f7c646cd978` | `671c21786931b506565883659f4c89926092e3ec3802d3ccd71a0d60da55426c` |
+| 결과 ISO (음성판) | 6,207,451,136 | `67dd4fa7b0fa04120c3dc559719f7961` | `0bb345cb19a5d92a5a94e5735d3e96b999755a8d` | `fa9df6a2acb5bd7b69193fa5bd07602dc919a5965854fee4bd8428edf4f8fcb1` |
+| `DQ8_KO_v1.6.xdelta` | 51,677,020 | | | `a3dc07eabce9dd80aa1f1815eea1e4114cb187249de6f4b5ea36c4c70992b92a` |
+| `DQ8_KO_v1.6_voice.xdelta` | 1,794,297,782 | | | `09c31c43d3c55faf88edcd11e6dbbb0500cd76494b6484f8a30addbd76917ee2` |
+
+두 xdelta를 원본에 적용한 결과가 각 결과 ISO와 같은지 확인했습니다(SHA-1 일치).
+
 # v1.5 해시
 
 | 파일 | 크기 (B) | MD5 | SHA-1 | SHA-256 |

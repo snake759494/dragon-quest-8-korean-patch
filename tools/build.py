@@ -249,6 +249,9 @@ def main(out_iso=OUT_ISO):
     assert len(nb) <= o1 - o0, ('트로데 코멘트 초과', len(nb) - (o1 - o0))
     d[o0:o1] = nb + b'\0' * (o1 - o0 - len(nb))
     files[sk] = bytes(d)
+    for _k in os.environ.get('DQ8_SKIP', '').split(','):   # 시험용: 지정한 파일은 원본 그대로
+        if _k:
+            files.pop(_k, None)
 
     # ---- 메뉴 창 폰트 font16 (JIS 배열): 한자 자리에 한글 2,350자
     for n in ('font16.img', '_font16.img', 'img' + BS + 'font16.img', 'img' + BS + 'font16.dat'):

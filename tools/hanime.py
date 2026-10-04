@@ -397,11 +397,18 @@ def free_runs(elf, exclude):
             cur = [s, n]
     if cur:
         runs.append(tuple(cur))
+    ptr = set()                                          # 데이터 안 포인터(표)로 가리키는 주소도 제외
+    for o in range(0x180, len(d) - 3, 4):
+        w = struct.unpack_from('<I', d, o)[0]
+        if 0x380000 <= w < 0x3C0000:
+            ptr.add(w - 0x100000 + 0x180)
     ok = []
     for s, n in runs:
         a = (s + 3) & ~3
         e = s + n - 1                                    # 마지막 NUL 은 남김
         if any(x < e and a < y for x, y in exclude):
+            continue
+        if any(f in ptr for f in range(s, s + n)):
             continue
         if e - a >= 16:
             ok.append((a, (e - a) & ~3))

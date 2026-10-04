@@ -12,7 +12,7 @@ TR = os.path.join(ROOT, 'translation')
 TRODE_MES = (0x2C900, 0x3A702)          # senreki2.chr 안 트로데 코멘트 mes (570개)
 FILES = ['menu/senreki2.chr', 'bin_ext/rkh.lst', 'bin_ext/slay_monster_list_2.bin']
 # 문자열이 아니라 구조 안에 박힌 글자 코드 (파일, 오프셋, 원래 글자, 바꿀 글자)
-CODES = [('menu/senreki2.chr', 0x2C2F4, '個', '개')]   # 도감·기록의 개수 단위
+CODES = []   # (주의) 0x2C2F4 의 8C C2 는 '個' 가 아니라 오프셋 0x2C28C 였음 -> 고치면 몬스터 정보·레시피 화면에서 튕김
 PAK_MEMBERS = {'bin_ext/rkh.lst': ('bin/bin_ext.pak', 'rkh.lst')}
 
 
