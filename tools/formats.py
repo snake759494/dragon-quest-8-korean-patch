@@ -15,15 +15,16 @@ class Pak:
             hs, ds, tot, _ = struct.unpack_from('<IIII', data, p + 0x40)
             if hs != 0x50 or ds == 0xffffffff:
                 break
-            self.items.append([bytearray(data[p:p + 0x50]), bytes(data[p + hs:p + hs + ds])])
+            self.items.append([bytearray(data[p:p + 0x50]), bytes(data[p + hs:p + hs + ds]),
+                               bytes(data[p + hs + ds:p + tot])])   # 원래 채움 바이트 (길이가 그대로면 보존)
             p += tot
         self.tail = bytes(data[p:])  # terminator header + padding
 
     def names(self):
-        return [h[:0x20].split(b'\0')[0].decode('ascii', 'replace') for h, _ in self.items]
+        return [h[:0x20].split(b'\0')[0].decode('ascii', 'replace') for h, _, _ in self.items]
 
     def get(self, name):
-        for (h, d), n in zip(self.items, self.names()):
+        for (h, d, _), n in zip(self.items, self.names()):
             if n == name:
                 return d
         raise KeyError(name)
@@ -37,11 +38,15 @@ class Pak:
 
     def build(self):
         out = bytearray()
-        for h, d in self.items:
-            tot = (0x50 + len(d) + 15) & ~15
+        for h, d, pad in self.items:
+            if struct.unpack_from('<I', h, 0x44)[0] == len(d):   # 길이 그대로: 원래 채움 바이트까지 보존
+                tot, fill = struct.unpack_from('<I', h, 0x48)[0], pad
+            else:
+                tot = (0x50 + len(d) + 15) & ~15
+                fill = b'\0' * (tot - 0x50 - len(d))
             h = bytearray(h)
             struct.pack_into('<II', h, 0x44, len(d), tot)
-            out += h + d + b'\0' * (tot - 0x50 - len(d))
+            out += h + d + fill
         return bytes(out + self.tail)
 
 

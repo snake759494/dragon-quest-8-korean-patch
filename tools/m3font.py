@@ -1,7 +1,7 @@
 """지명 글꼴 m3 (meswin\\fonttbl_m3.bin + font_tex_m3.pak) 한글판.
 
 지도 제목·지역 진입 표시 등 지명이 이 글꼴로 그려진다. 원본은 ASCII 88자 + 가나·지명용 한자 148자.
-FontTex_m3_0.tm2: 512x416 4bpp, 24x26 칸 21열, 한 장에 294칸(21x14). 원본은 한 장만 쓰고 _1·_2 는 빈 파일 -> 넘치면 _1 에 이어서.
+FontTex_m3_0.tm2: 512x416 4bpp, 24x26 칸 21열, 한 장에 294칸(21x14). 원본은 한 장만 쓰고 _1·_2 는 빈 파일(둘째 장을 채우면 지도 화면에서 멈춤).
 한글판 = ASCII 88 + 전각 기호·숫자(원본 그대로) + 지명(개발용 제외)의 한글.
 """
 import os, struct
@@ -59,12 +59,17 @@ def build(a):
     t = a.read(a.hd6.get('meswin/fonttbl_m3.bin'))
     na, nn, tot = struct.unpack_from('<HHI', t, 0)
     codes = [struct.unpack_from('>H', t, 8 + 2 * i)[0] for i in range(tot)]
-    keep = codes[:na] + [c for c in codes[na:nn] if not (0x829F <= c <= 0x8396)]   # 가나 빼고 기호·숫자
+    # 한 장(294칸)에 맞춘다. 둘째 장을 쓰면 글꼴 묶음이 원본보다 커져 지도 화면에서 멈춘다.
+    # ASCII 는 숫자·대문자·공백과 지명에 쓰인 문자만, 전각은 가나만 빼고 그대로.
+    names = display_names()
+    used = set(ch for k in names for ch in k)
+    asc = [c for c in codes[:na] if chr(c).isdigit() or chr(c).isupper() or chr(c) == ' ' or chr(c) in used]
+    keep = asc + [c for c in codes[na:nn] if not (0x829F <= c <= 0x8396)]
     cm = charmap()
-    hang = sorted(set(cm[ch] for k in display_names() for ch in k if '가' <= ch <= '힣'))
+    hang = sorted(set(cm[ch] for k in names for ch in k if '가' <= ch <= '힣'))
     new = keep + hang
-    assert len(new) <= 2 * PER_PAGE, ('m3 칸 부족', len(new))
-    tb = struct.pack('<HHI', na, len(keep), len(new)) + b''.join(struct.pack('>H', c) for c in new)
+    assert len(new) <= PER_PAGE, ('m3 칸 부족', len(new))
+    tb = struct.pack('<HHI', len(asc), len(keep), len(new)) + b''.join(struct.pack('>H', c) for c in new)
     pk = Pak(a.read(a.hd6.get('meswin/font_tex_m3.pak')))
     d0 = pk.get('FontTex_m3_0.tm2')
     src, pix, size = _tim(d0)

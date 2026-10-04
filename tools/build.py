@@ -274,6 +274,8 @@ def main(out_iso=OUT_ISO):
         if f == 'SLPM_658.88':
             namepad.patch(data, plain_sjis)
             fontfix.patch(data)                     # 글꼴 확장 (s3 6페이지, 8KB 공용 글자표)
+            import camopt                           # 설정 메뉴 '카메라' (반전) 항목
+            camopt.patch(data)
             # 이름 입력 자모 조합: 대사(l3)·메뉴(s3) 두 글꼴에 모두 있는 음절만 조합 허용
             allowed = [ch for ch, c in charmap().items() if '가' <= ch <= '힣' and c in Lk.index and c in Sk.index]
             n_ok, n_dir = hanime.patch(data, allowed, charmap())

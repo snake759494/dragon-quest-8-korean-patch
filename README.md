@@ -5,12 +5,30 @@ PS2 일본판 **ドラゴンクエストVIII 空と海と大地と呪われし�
 ## 적용 방법
 1. 원본 `Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso` 준비
    - 크기 4,062,642,176 B, SHA-1 `85a1b76a9f7a21d10da967cbf2688f1b79071f5c`
-2. 릴리즈에서 `DQ8_KO_v1.4.xdelta` 받기
+2. 릴리즈에서 xdelta 하나를 받기
+   - `DQ8_KO_v1.5.xdelta` — 기본판 (약 52MB)
+   - `DQ8_KO_v1.5_voice.xdelta` — 3DS판 일본어 음성을 더한 음성판 (약 1.8GB, 결과 ISO 6.2GB)
 3. xdeltaUI 또는 명령:
    ```
-   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.4.xdelta DQ8_KR.iso
+   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.5.xdelta DQ8_KR.iso
    ```
-4. 결과 SHA-1 `472d9cf46cb77619925c90b42fea7dddb2c70e75` → PCSX2 등에서 실행
+4. 결과 해시는 `validation/release_hashes.md` 참고 → PCSX2 등에서 실행
+
+## 카메라 반전 설정
+필드 메뉴 **작전 → 설정 → 카메라**에서 오른쪽 스틱 카메라 방향을 바꿀 수 있습니다. (v1.5부터)
+
+![카메라 설정](docs/images/camera_setting.png)
+
+| 선택 | 동작 |
+|---|---|
+| 보통 | 원본 그대로 |
+| 좌우 반전 | 좌우 회전만 반대로 |
+| 상하 반전 | 위아래 시점만 반대로 |
+| 모두 반전 | 좌우·상하 모두 반대로 (북미판의 반전 옵션을 둘 다 켠 것과 같음) |
+
+- 일본판에는 이 설정이 없습니다. 원래 설정 메뉴에 숨겨져 있던 세 번째 항목 자리를 '카메라'로 살렸습니다.
+- 값은 세이브 데이터의 시스템 설정에 함께 저장됩니다. 저장하면 다음에 불러와도 유지되고, 이전 버전 세이브는 '보통'으로 시작합니다.
+- 필드 카메라와 그 밖의 자유 카메라에 모두 적용됩니다.
 
 ## 한글화 범위
 - 대사 전체: 이벤트 대사, 마을 주민 대사, 동료 대화, 필드 대화, 줄거리 요약, 보물상자·조사 메시지, 책장 책

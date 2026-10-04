@@ -418,7 +418,7 @@ def patch(elf, allowed, charmap):
         u = ord(ch) - 0xAC00
         bm[u >> 3] |= 1 << (u & 7)
     exclude = [(0x2A8BF0, 0x2A8CF0), (0x2A8020, 0x2A8130), (0x29D250, 0x29D378),   # 음성판 코드 자리
-               (0x2A61F8, 0x2A6218)] + [(c[0], c[0] + c[1]) for c in
+               (0x2A61F8, 0x2A6218), (0x2A7190, 0x2A7230)] + [(c[0], c[0] + c[1]) for c in
                                         (CODE_CAVE, HELP_CAVE, DATA_CAVE, VOWEL_CAVE, TAIL_CAVE, SYL_CAVE)]
     runs = sorted(free_runs(elf, exclude), key=lambda r: -r[1])
     dir_run = runs[-1] if runs[-1][1] >= 64 else next(r for r in runs[::-1] if r[1] >= 64)
