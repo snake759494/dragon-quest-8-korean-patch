@@ -1,6 +1,6 @@
 # 빌드 방법
 
-필요: Python 3.12+, `pip install numpy pillow scipy scikit-image pycdlib`, NanumSquare Neo 글꼴(`NanumSquareNeo-cBd.ttf`, 네이버 배포)
+필요: Python 3.12+, `pip install numpy pillow scipy scikit-image pycdlib opencv-python-headless imageio-ffmpeg`, NanumSquare Neo 글꼴(`NanumSquareNeo-cBd.ttf`, 네이버 배포)
 
 1. 저장소 최상위에 원본 ISO `Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso`와 `NanumSquareNeo-cBd.ttf`를 둡니다.
 2. 원문 추출(대조·검사용, 저장소에는 원문을 싣지 않음):

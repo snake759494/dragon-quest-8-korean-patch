@@ -1,8 +1,8 @@
 """지명 글꼴 m3 (meswin\\fonttbl_m3.bin + font_tex_m3.pak) 한글판.
 
 지도 제목·지역 진입 표시 등 지명이 이 글꼴로 그려진다. 원본은 ASCII 88자 + 가나·지명용 한자 148자.
-FontTex_m3_0.tm2: 512x416 4bpp, 24x26 칸 21열, 한 장에 294칸(21x14)만 쓴다(나머지 텍스처는 빈 파일).
-한글판 = ASCII 88 + 전각 기호·숫자(원본 그대로) + 화면에 나오는 지명(건물 안 '：' 이름·개발용 제외)의 한글.
+FontTex_m3_0.tm2: 512x416 4bpp, 24x26 칸 21열, 한 장에 294칸(21x14). 원본은 한 장만 쓰고 _1·_2 는 빈 파일 -> 넘치면 _1 에 이어서.
+한글판 = ASCII 88 + 전각 기호·숫자(원본 그대로) + 지명(개발용 제외)의 한글.
 """
 import os, struct
 import numpy as np
@@ -14,13 +14,13 @@ from extract import read_tsv
 
 ROOT = dq8arc.ROOT
 CW, CH, COLS, PER_PAGE = 24, 26, 21, 21 * 14
-DEV = ('전투', '테스트', '수정', '이벤트', '디버그', 'fld', '（')
+DEV = ('전투', '테스트', '수정', '이벤트', '디버그', 'fld', '필드', '월드맵')
 TTF = 'NanumSquareNeo-cBd.ttf'
 
 
 def display_names():
     rows = read_tsv(os.path.join(ROOT, 'translation', 'ko', 'map', 'mapnames.tsv'))
-    return [k for _, k in rows if '：' not in k and not any(d in k for d in DEV)]
+    return [k for _, k in rows if not any(d in k for d in DEV)]
 
 
 def _tim(d):
@@ -63,19 +63,22 @@ def build(a):
     cm = charmap()
     hang = sorted(set(cm[ch] for k in display_names() for ch in k if '가' <= ch <= '힣'))
     new = keep + hang
-    assert len(new) <= PER_PAGE, ('m3 칸 부족', len(new))
+    assert len(new) <= 2 * PER_PAGE, ('m3 칸 부족', len(new))
     tb = struct.pack('<HHI', na, len(keep), len(new)) + b''.join(struct.pack('>H', c) for c in new)
     pk = Pak(a.read(a.hd6.get('meswin/font_tex_m3.pak')))
-    d = bytearray(pk.get('FontTex_m3_0.tm2'))
-    src, pix, size = _tim(bytes(d))
-    dst = np.zeros_like(src)
+    d0 = pk.get('FontTex_m3_0.tm2')
+    src, pix, size = _tim(d0)
     old = {c: i for i, c in enumerate(codes)}
     rev = {v: k for k, v in cm.items()}
-    for i, c in enumerate(new):
-        _cell(dst, i)[:] = _cell(src, old[c]) if i < len(keep) else _render(rev[c])
-    flat = dst.reshape(-1)
-    d[pix:pix + size] = ((flat[0::2] & 15) | (flat[1::2] << 4)).astype(np.uint8).tobytes()
-    pk.put('FontTex_m3_0.tm2', bytes(d))
+    for page in range((len(new) + PER_PAGE - 1) // PER_PAGE):   # 294칸 넘으면 둘째 장(원본은 빈 파일)
+        d = bytearray(d0)
+        dst = np.zeros_like(src)
+        for j, c in enumerate(new[page * PER_PAGE:(page + 1) * PER_PAGE]):
+            i = page * PER_PAGE + j
+            _cell(dst, j)[:] = _cell(src, old[c]) if i < len(keep) else _render(rev[c])
+        flat = dst.reshape(-1)
+        d[pix:pix + size] = ((flat[0::2] & 15) | (flat[1::2] << 4)).astype(np.uint8).tobytes()
+        pk.put('FontTex_m3_%d.tm2' % page, bytes(d))
     return {'meswin\\fonttbl_m3.bin': tb, 'meswin\\font_tex_m3.pak': pk.build()}, len(hang)
 
 

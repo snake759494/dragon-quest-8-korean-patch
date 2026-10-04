@@ -221,6 +221,8 @@ def main(out_iso=OUT_ISO):
     files.update(menutext.build(to_sjis))
     files.update(title_logo.build())                # 타이틀 로고 부제
     files.update(flyhelp.build())                  # 신조 비행 조작 설명 그림
+    import btlmess                                  # 전투 연출 파일 속 대사 (폴크·마르크 전투)
+    files.update(btlmess.build(a, files, to_sjis))
     files.update(mapname.build(a, to_sjis))
     m3files, _ = m3font.build(a)                    # 지명 글꼴 한글판
     files.update(m3files)
@@ -236,7 +238,7 @@ def main(out_iso=OUT_ISO):
             files[pn.replace('/', BS)] = pk.build()
 
     # ---- 전투 기록 화면 트로데 코멘트: senreki2.chr 안에 박힌 mes (l3 코드, 크기 고정)
-    sk = 'menu' + BS + 'senreki2.chr'
+    sk = 'menu/senreki2.chr'                        # instr.apply 가 쓴 키와 같게 (덮어쓰기 방지)
     d = bytearray(files[sk] if sk in files else a.read(a.hd6.get(sk)))
     o0, o1 = instr.TRODE_MES
     ms = Mes(bytes(d[o0:o1]))
@@ -280,6 +282,8 @@ def main(out_iso=OUT_ISO):
                 import voicehook
                 voicehook.patch(data)
         isofiles[f] = bytes(data)
+    import mvisub                                   # 동영상 속 대화창 자막 (엔딩·트로데인 회상)
+    isofiles.update(mvisub.build_all())
 
     if MISSING:
         print('표에 없어 ■로 바꾼 글자:', MISSING)

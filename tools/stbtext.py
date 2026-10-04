@@ -11,9 +11,10 @@ from extract import write_tsv, read_tsv
 
 ROOT = dq8arc.ROOT
 TR = os.path.join(ROOT, 'translation')
-SJ = re.compile(rb'(?:[\x81-\x9f\xe0-\xef][\x40-\x7e\x80-\xfc]|[\x20-\x7e\n])+\x00')
+SJ = re.compile(rb'(?:[\x81-\x9f\xe0-\xef][\x40-\x7e\x80-\xfc]|[\x20-\x7e\xa1-\xdf\n])+\x00')   # \xa1-\xdf: 반각 ｢｣ 등
 SENT = re.compile(r'[。！？…「」、]|\n|○強主○')
 JP = re.compile(r'[぀-ヿ一-鿿]')
+SIGN = re.compile(r'^(この先|これより)[^　]*　|　→$')            # 표지판 (문장부호 없음)
 
 
 def is_stb(name):
@@ -35,7 +36,7 @@ def sentences(data):
             s = raw.decode('cp932')
         except UnicodeDecodeError:
             continue
-        if JP.search(s) and SENT.search(s):
+        if JP.search(s) and (SENT.search(s) or SIGN.search(s)):
             out.append((m.start(), len(raw), s))
     return out
 

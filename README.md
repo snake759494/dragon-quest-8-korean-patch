@@ -5,12 +5,12 @@ PS2 일본판 **ドラゴンクエストVIII 空と海と大地と呪われし�
 ## 적용 방법
 1. 원본 `Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso` 준비
    - 크기 4,062,642,176 B, SHA-1 `85a1b76a9f7a21d10da967cbf2688f1b79071f5c`
-2. 릴리즈에서 `DQ8_KO_v1.3.xdelta` 받기
+2. 릴리즈에서 `DQ8_KO_v1.4.xdelta` 받기
 3. xdeltaUI 또는 명령:
    ```
-   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.3.xdelta DQ8_KR.iso
+   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.4.xdelta DQ8_KR.iso
    ```
-4. 결과 SHA-1 `763b9dc8fb22ad1f0a99ee007ed11557d0ecd351` → PCSX2 등에서 실행
+4. 결과 SHA-1 `472d9cf46cb77619925c90b42fea7dddb2c70e75` → PCSX2 등에서 실행
 
 ## 한글화 범위
 - 대사 전체: 이벤트 대사, 마을 주민 대사, 동료 대화, 필드 대화, 줄거리 요약, 보물상자·조사 메시지, 책장 책
@@ -23,7 +23,7 @@ PS2 일본판 **ドラゴンクエストVIII 空と海と大地と呪われし�
 
 ## 알려진 한계
 - 컷신의 짧은 감탄사 일부는 연출용 라벨과 구분하지 못해 일본어로 남겨 두었습니다.
-- 타이틀 로고의 영문 "DRAGON QUEST" 그림과 동영상은 원본 그대로입니다.
+- 타이틀 로고의 영문 "DRAGON QUEST" 그림은 원본 그대로입니다. 동영상 속 대화창은 한글로 바꿨지만, 글자가 한 자씩 찍히는 연출 대신 대사가 한 번에 나옵니다.
 - PCSX2 v2.2.0에서 초반부(트라페타까지)를 확인했습니다. 전 구간 검수는 아직입니다. 글자 겹침·잘림·일본어 잔존을 발견하면 이슈로 알려 주세요.
 
 ## 저장소 구성
