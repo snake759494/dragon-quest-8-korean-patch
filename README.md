@@ -6,11 +6,11 @@ PS2 일본판 **ドラゴンクエストVIII 空と海と大地と呪われし�
 1. 원본 `Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso` 준비
    - 크기 4,062,642,176 B, SHA-1 `85a1b76a9f7a21d10da967cbf2688f1b79071f5c`
 2. 릴리즈에서 xdelta 하나를 받기
-   - `DQ8_KO_v1.6.xdelta` — 기본판 (약 52MB)
-   - `DQ8_KO_v1.6_voice.xdelta` — 3DS판 일본어 음성을 더한 음성판 (약 1.8GB, 결과 ISO 6.2GB)
+   - `DQ8_KO_v1.7.xdelta` — 기본판 (약 52MB)
+   - `DQ8_KO_v1.7_voice.xdelta` — 3DS판 일본어 음성을 더한 음성판 (약 1.8GB, 결과 ISO 6.2GB)
 3. xdeltaUI 또는 명령:
    ```
-   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.6.xdelta DQ8_KR.iso
+   xdelta3 -d -s "Dragon Quest VIII - Sora to Umi to Daichi to Norowareshi Himegimi (Japan, Asia).iso" DQ8_KO_v1.7.xdelta DQ8_KR.iso
    ```
 4. 결과 해시는 `validation/release_hashes.md` 참고 → PCSX2 등에서 실행
 
@@ -28,7 +28,7 @@ PS2 일본판 **ドラゴンクエストVIII 空と海と大地と呪われし�
 
 - 일본판에는 이 설정이 없습니다. 원래 설정 메뉴에 숨겨져 있던 세 번째 항목 자리를 '카메라'로 살렸습니다.
 - 값은 세이브 데이터의 시스템 설정에 함께 저장됩니다. 저장하면 다음에 불러와도 유지되고, 이전 버전 세이브는 '보통'으로 시작합니다.
-- 필드 카메라와 그 밖의 자유 카메라에 모두 적용됩니다.
+- 3인칭 필드 카메라와 1인칭 시점에 모두 적용되며, 1인칭도 3인칭과 같은 방향으로 움직입니다.
 
 ## 한글화 범위
 - 대사 전체: 이벤트 대사, 마을 주민 대사, 동료 대화, 필드 대화, 줄거리 요약, 보물상자·조사 메시지, 책장 책

@@ -161,3 +161,13 @@ menu\cmd4.pac	allmenu9.mes	s3
 meswin\system_l.mes		l3
 meswin\system_s.mes		s3
 title\title.mes		s3
+event\villager\message\d07.bin		l3
+event\villager\message\d10.bin		l3
+event\villager\message\field07.bin		l3
+event\villager\message\r01i01.bin		skip
+event\villager\message\r02i01.bin		l3
+event\villager\message\s04.bin		l3
+event\villager\message\s07i01.bin		l3
+event\villager\message\s22.bin		l3
+event\villager\message\s28.bin		l3
+event\villager\message\s30.bin		l3

@@ -30,15 +30,18 @@ MOVIES = {
             (13250, 14040, [('e1800/e1804/e1804_5', k) for k in ('1000', '1010', '1020', '1030', '1040', '1050', '1060')])],
     '602_2': [(10, 270, [('e600/e602/e602_2', k) for k in ('420', '430')]),
               (600, 700, [('e600/e602/e602_2', '440')])],
+    '605': [(3160, 3260, [('e600/e605/e605_2b', '200')])],          # 배를 얻는 장면의 이슈마울리 (반투명 대화창)
+    '605_W': [(3160, 3260, [('e600/e605/e605_2b', '200')])],
 }
-BOX = {'': (33, 321, 478, 421)}
+BOX = {'': (33, 321, 478, 421), '605': (26, 325, 486, 428), '605_W': (33, 322, 479, 423)}
+MIN_HOLD = {'605': 20, '605_W': 20}                 # 대사가 다 찍힌 뒤 유지 프레임이 짧은 영상
 
 
 def box_on(f, box):
     x0, y0, x1, y1 = box
     g = f.mean(2)
     t = g[y0, x0 + 5:x1 - 5]; b = g[y1 - 1, x0 + 5:x1 - 5]; l = g[y0 + 5:y1 - 5, x0]; r = g[y0 + 5:y1 - 5, x1 - 1]
-    return min(t.mean(), b.mean(), l.mean(), r.mean()) > 150 and t.std() < 25
+    return min(t.mean(), b.mean(), l.mean(), r.mean()) > 140 and t.std() < 30
 
 
 def text_mask(f, box):
@@ -69,23 +72,24 @@ def draw(img, text, box):
     return np.array(im)
 
 
-def segments(on, masks, a, b):
-    """구간 [a,b) 안에서 글자가 40프레임 이상 그대로인 부분(= 대사 하나가 다 찍힌 상태)"""
+def segments(on, masks, a, b, hold=40):
+    """구간 [a,b) 안에서 글자가 hold 프레임 이상 그대로인 부분(= 대사 하나가 다 찍힌 상태)"""
     out, s, prev = [], None, None
     for i in range(a, b):
         if not on.get(i):
-            if s is not None and i - s >= 40: out.append((s, i))
+            if s is not None and i - s >= hold: out.append((s, i))
             s = None; continue
         m = masks[i]
         if s is None or np.logical_xor(m, prev).mean() > 0.01:
-            if s is not None and i - s >= 40: out.append((s, i))
+            if s is not None and i - s >= hold: out.append((s, i))
             s = i
         prev = m
-    if s is not None and b - s >= 40: out.append((s, b))
+    if s is not None and b - s >= hold: out.append((s, b))
     return out
 
 
-def process(stem, data, box=BOX['']):
+def process(stem, data, box=None):
+    box = box or BOX.get(stem, BOX[''])
     m = mvi.Movie(data)
     gl = mvienc.gops(m.es)
     want = set()                                   # 대화 구간이 걸친 GOP 의 프레임만 메모리에
@@ -106,7 +110,7 @@ def process(stem, data, box=BOX['']):
     assert total == sum(g[2] for g in gl), (total, sum(g[2] for g in gl))
     new = {}
     for a, b, lines in MOVIES[stem]:
-        segs = segments(on, masks, a, b)
+        segs = segments(on, masks, a, b, MIN_HOLD.get(stem, 40))
         assert len(segs) == len(lines), (stem, a, b, segs, len(lines))
         for i in range(a, b):
             if not on.get(i):
@@ -129,6 +133,7 @@ def process(stem, data, box=BOX['']):
 
 
 FILES = [('MOVIE/602_2.MVI', '602_2'), ('MOVIE/602_2_W.MVI', '602_2'),
+         ('MOVIE/605.MVI', '605'), ('MOVIE/605_W.MVI', '605_W'),
          ('MOVIE/STAFF.MVI', 'STAFF'), ('MOVIE/STAFF_W.MVI', 'STAFF'),
          ('MOVIE/EV/URA.MVI', 'URA'), ('MOVIE/EV/URA_W.MVI', 'URA')]
 CACHE = os.path.join(ROOT, 'build', 'movie')

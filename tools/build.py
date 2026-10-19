@@ -3,7 +3,7 @@
 python tools/build.py [출력 ISO]
 """
 import os, sys, re, collections
-import instr, itemana, mapname, hanime, fontfix, m3font, dq8arc, isopatch, btltext, namepad, stbtext, menutext, title_logo, flyhelp
+import elfpad, instr, itemana, mapname, hanime, fontfix, m3font, dq8arc, isopatch, btltext, namepad, stbtext, menutext, title_logo, flyhelp
 VOICE_MODE = os.environ.get('DQ8_VOICE', '')      # '' | 'test' | 'full'
 from font16 import patch_font16
 from elfstr import read_iso_file
@@ -221,6 +221,8 @@ def main(out_iso=OUT_ISO):
     files.update(menutext.build(to_sjis))
     files.update(title_logo.build())                # 타이틀 로고 부제
     files.update(flyhelp.build())                  # 신조 비행 조작 설명 그림
+    import morimemo                                 # 모리의 메모 3장 그림
+    files.update(morimemo.build())
     import btlmess                                  # 전투 연출 파일 속 대사 (폴크·마르크 전투)
     files.update(btlmess.build(a, files, to_sjis))
     files.update(mapname.build(a, to_sjis))
@@ -272,6 +274,8 @@ def main(out_iso=OUT_ISO):
             off = int(key, 16)
             end = data.index(b'\0', off)
             b = (to_sjis if f != 'SLPM_658.88' else plain_sjis)(text)
+            if len(b) > end - off and f == 'SLPM_658.88':     # 뒤 정렬용 0 채움까지 (아무도 가리키지 않을 때만)
+                end = elfpad.extend(data, off, end, len(b))
             assert len(b) <= end - off, ('ELF 문자열 초과', f, key, text)
             data[off:end] = b + b'\0' * (end - off - len(b))
         if f == 'SLPM_658.88':
